@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<style>
+canvas {
+    border:1px solid #d3d3d3;
+    background-color: #f1f1f1;
+}
+</style>
+</head>
+<body onload="initPage()">
+    <h1>Bitcoin Node Network Transaction Propagation Simulator</h1>
+<script>
+
+var myGamePiece;
+var myObstacles = [];
+var myScore;
+
+var canvasWidth = 1100;
+var canvasHeight = 600;
+var nodeWidth = 10;
+var nodeHeight = 10;
+var numNodes = 750;
+var numBadNodes = 100;
+var numMiningNodes = 10;
+var doubleSpendDelay = 50;
+var listeningColour = "grey";
+var transaction1Colour = "blue";
+var transaction2Colour = "red";
+var winningMinerColour = "green";
+var minConnectionsPerNode = 20;
+var maxConnectionsPerNode = 117;
+var nodeDistanceThreshhold = 100;
+var nodes = [];
+var connections = [];
+var simulationArea;
+var ticker = 0;
+var tickDelay = 20;
+var distanceDivider = 2;
+var globalConnectionAttempts = 0;
+
+const LISTENING = 0;
+const TRANSACTION1 = 1;
+const TRANSACTION2 = 2;
+
+class Component {
+    constructor(width, height, colour, x, y, type) {
+        this.type = type;
+        this.score = 0;
+        this.width = width;
+        this.height = height;
+        this.speedX = 0;
+        this.speedY = 0;
+        this.x = x;
+        this.y = y;
+        //this.update(colour)
+    }
+    update(colour,strokeColour,miningDot) {
+        var ctx = simulationArea.context;
+        if (this.type == "text") {
+            ctx.font = this.width + " " + this.height;
+            ctx.fillStyle = colour;
+            ctx.fillText(this.text, this.x, this.y);
+        } else if (this.type == "connector") {
+            ctx.beginPath();
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = listeningColour;
+            ctx.moveTo(this.x, this.y);
+            ctx.lineTo(this.width, this.height);
+            ctx.stroke();
+        } else {
+            //ctx.fillStyle = color;
+            //ctx.fillRect(this.x, this.y, this.width, this.height);
+            ctx.beginPath();
+            ctx.arc(this.x, this.y,this.width/2,0,2*Math.PI,false);
+            ctx.fillStyle = colour;
+            ctx.fill();
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = strokeColour;
+            ctx.stroke();
+            if (miningDot) {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y,this.width/3,0,2*Math.PI,false);
+                ctx.fillStyle = "black";
+                ctx.fill();
+                //ctx.lineWidth = 1;
+                //ctx.strokeStyle = "black";
+                //ctx.stroke();
+            }
+        }
+    }
+}   
+class Message {
+    constructor(data,distance){
+        this.data = data;
+        this.distance = distance;
+    }
+}
+class Node {
+    constructor(x,y,maxConnections){
+        this.x = x;
+        this.y = y;
+        this.colour = listeningColour;
+        this.sprite = new Component(nodeWidth, nodeHeight, listeningColour, this.x, this.y);
+        this.maxConnections = maxConnections;
+        this.nodes = [];
+        this.distances = [];
+        this.connections = [];
+        this.receivedMessages = [];
+        this.winningMiner = false;
+        this.bad = false;
+        this.mining = false;
+        this.status = LISTENING;
+    }
+    update() {
+        var i;
+        for (i = 0; i < this.receivedMessages.length; i++) {
+            this.receivedMessages[i].distance -= 1;
+            //document.getElementById('distanceDisplay').innerHTML = this.receivedMessages[i].distance.toString();
+            if (this.receivedMessages[i].distance < 1) {
+                this.status = this.receivedMessages[i].data;
+                globalConnectionAttempts -= this.receivedMessages.length;
+                this.receivedMessages.length = 0;
+            }
+        }
+        var strokeColour = listeningColour;
+        if (this.bad) {
+            strokeColour = "black";
+        }
+        switch (this.status) {
+          case TRANSACTION1:
+            for (i = 0; i < this.nodes.length; i++) {
+                this.nodes[i].receive(TRANSACTION1,this.distances[i]);
+            }
+            this.sprite.update(transaction1Colour,strokeColour,this.mining);
+            break;
+          case TRANSACTION2:
+            for (i = 0; i < this.nodes.length; i++) {
+                this.nodes[i].receive(TRANSACTION2,this.distances[i]);
+            }
+            this.sprite.update(transaction2Colour,strokeColour,this.mining);
+            break;
+          default:
+            this.sprite.update(listeningColour,strokeColour,this.mining);
+        }
+        if (this.winningMiner) {
+            var ctx = simulationArea.context;
+            ctx.beginPath();
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = winningMinerColour;
+            ctx.rect(this.x-nodeWidth,this.y-nodeHeight,nodeWidth*2,nodeHeight*2);
+            ctx.stroke();
+        }
+    }
+    receive(transaction,distance) {
+        if (this.status == LISTENING) {
+            if (this.bad && transaction == TRANSACTION1) {
+            } else {
+                this.receivedMessages.push(new Message(transaction,distance/distanceDivider));
+                globalConnectionAttempts++;
+            }
+        }
+    }
+    connect(n,d,c) {
+        if (!this.nodes.includes(n)) {
+            this.nodes.push(n)
+            this.distances.push(d)
+            this.connections.push(c)
+        }
+    }
+}
+class SimulationArea {
+    constructor() {
+        this.canvas = document.createElement("canvas");
+    }
+    init() {
+        this.canvas.width = parseInt(document.getElementById('canvasWidth').value,10);
+        this.canvas.height = parseInt(document.getElementById('canvasHeight').value,10);
+        canvasWidth = parseInt(document.getElementById('canvasWidth').value,10);
+        canvasHeight = parseInt(document.getElementById('canvasHeight').value,10);
+        this.context = this.canvas.getContext("2d");
+        document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+        this.frameNo = 0;
+        
+        var i;
+        for (i = 0; i < nodes.length; i++) {
+            nodes[i].update();
+        }
+        
+        for (i = 0; i < nodes.length; i++) {
+            var j;
+            for (j = 0; j < nodes.length; j++) {
+                var d = nodeDistance(nodes[i],nodes[j]);
+                if (d < nodeDistanceThreshhold) {
+                    if (nodes[i].connections.length < nodes[i].maxConnections &&
+                        nodes[j].connections.length < nodes[j].maxConnections) {
+                        connectNodes(nodes[i],nodes[j],d);
+                    }
+                }
+            }
+        }
+        
+        for (i = 0; i < connections.length; i++) {
+            connections[i].update();
+        }
+    }
+    start() {
+        this.interval = setInterval(updateSimulation, tickDelay);
+    }
+    stop() {
+        clearInterval(this.interval);
+    }
+    clear() {
+        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+}
+
+function connectNodes(node1,node2,d) {
+    connections.push(new Component(
+        node2.sprite.x, node2.sprite.y, "grey", node1.sprite.x, node1.sprite.y, "connector"
+    ));
+    node1.connect(node2,d,connections[connections.length - 1]);
+    node2.connect(node1,d,connections[connections.length - 1]);
+}
+function createNodes() {
+    var i;
+    numNodes = parseInt(document.getElementById('numNodes').value,10);
+    maxConnectionsPerNode = parseInt(document.getElementById('maxConnectionsPerNode').value,10);
+    minConnectionsPerNode = parseInt(document.getElementById('minConnectionsPerNode').value,10);
+    nodeIndices = []
+    for (i = 0; i < numNodes; i++) {
+        nodes.push(new Node(
+            Math.floor(Math.random() * (canvasWidth-nodeWidth*2)+nodeWidth),
+            Math.floor(Math.random() * (canvasHeight-nodeHeight*2)+nodeHeight),
+            randRange(minConnectionsPerNode,maxConnectionsPerNode)
+        ));
+        nodeIndices.push(i)
+    }
+    simulationArea.init();
+}
+function disableButton(btnId) {
+    if(btnId){document.getElementById(btnId).disabled = 'true';}
+}
+function everyinterval(n) {
+    if ((myGameArea.frameNo / n) % 1 == 0) {return true;}
+    return false;
+}
+function getRandomSubarray(arr,size) {
+    var shuffled = arr.slice(0), i = arr.length, temp, index;
+    while (i--) {
+        index = Math.floor((i + 1) * Math.random());
+        temp = shuffled[index];
+        shuffled[index] = shuffled[i];
+        shuffled[i] = temp;
+    }
+    return shuffled.slice(0, size);
+}
+function initPage() {
+    document.getElementById('canvasWidth').value = canvasWidth.toString();
+    document.getElementById('numNodes').value = numNodes.toString();
+    document.getElementById('numBadNodes').value = numBadNodes.toString();
+    document.getElementById('maxConnectionsPerNode').value = maxConnectionsPerNode.toString();
+    document.getElementById('minConnectionsPerNode').value = minConnectionsPerNode.toString();
+    document.getElementById('canvasHeight').value = canvasHeight.toString();
+    document.getElementById('numMiningNodes').value = numMiningNodes.toString();
+    document.getElementById('nodeDistanceThreshhold').value = nodeDistanceThreshhold.toString();
+    document.getElementById('doubleSpendDelay').value = doubleSpendDelay.toString();
+}
+function initSimulation() {
+    simulationArea = new SimulationArea();
+    simulationArea.init();
+}
+function nodeDistance(node1,node2) {
+    x = node2.sprite.x - node1.sprite.x;
+    y = node2.sprite.y - node1.sprite.y;
+    return Math.sqrt(Math.pow(x,2) + Math.pow(y,2));
+}
+function randRange(min,max) {
+  return Math.floor(Math.random() * (max - min + 1) + min);
+}
+function setBadNodes() {
+    numBadNodes = parseInt(document.getElementById('numBadNodes').value,10);
+    badNodes = getRandomSubarray(nodeIndices,numBadNodes);
+    for (i = 0; i < numBadNodes; i++) {
+        nodes[badNodes[i]].bad = true;
+    }
+    updateSimulationArea();
+}
+function setMiningNodes() {
+    numMiningNodes = parseInt(document.getElementById('numMiningNodes').value,10);
+    miningNodes = getRandomSubarray(nodeIndices,numMiningNodes);
+    for (i = 0; i < numMiningNodes; i++) {
+        nodes[miningNodes[i]].mining = true;
+    }
+    updateSimulationArea();
+}    
+function startSimulation(id) {
+    disableButton(id);
+    simulationArea.start();
+}
+function stopSimulation(id) {
+    disableButton(id);
+    simulationArea.stop();
+}
+function updateSimulation() {
+    ticker++;
+    if (ticker==doubleSpendDelay){startTransaction(TRANSACTION2);}
+    document.getElementById('tickerDisplay').innerHTML = ticker.toString();
+    document.getElementById('globalConnectionAttempts').innerHTML = globalConnectionAttempts.toString();
+    if (globalConnectionAttempts < 1) {
+        stopSimulation();
+        document.getElementById('globalConnectionAttempts').innerHTML = 'Transaction Propagation Simulation Complete';
+        var successfulMiner = Math.floor(Math.random() * (numMiningNodes-1));
+        var i;
+        var j = 0;
+        debugger;
+        for (i=0;i<nodes.length;i++) {
+            if (nodes[i].mining) {
+                if (j==successfulMiner) {
+                    nodes[i].winningMiner = true;
+                    document.getElementById('globalConnectionAttempts').innerHTML = 'Transaction Propagation Simulation Complete';
+                    var final_text = '';
+                    switch (nodes[i].status) {
+                        case LISTENING:
+                            final_text = 'had not received the transaction or the double spend transaction.'
+                            break;
+                        case TRANSACTION1:
+                            final_text = 'had received the genuine transaction.'
+                            break;
+                        case TRANSACTION2:
+                            final_text = 'had received the double spend transaction.'
+                    }
+                    document.getElementById('output').innerHTML = 'The next block is won by a node that '.concat(final_text);
+                    break;
+                } else {
+                    j++;
+                }
+            }
+        }
+    }
+    updateSimulationArea();
+}
+function updateSimulationArea() {
+    simulationArea.clear();
+    simulationArea.frameNo += 1;
+    var i;
+    for (i = 0; i < connections.length; i++) {
+        connections[i].update();
+    }
+    for (i = 0; i < numNodes; i++) {
+        nodes[i].update();
+    }
+}
+function startTransaction(transaction,id) {
+    disableButton(id);
+    doubleSpendDelay = parseInt(document.getElementById('doubleSpendDelay').value,10);
+    var i;
+    for (i = 0; i < numNodes; i++) {
+        if (nodes[i].status == LISTENING && !nodes[i].bad) {
+            nodes[i].status = transaction;
+            nodes[i].update();
+            break;
+        }
+    }
+}
+
+</script>
+<br>
+<table>
+<form action="/action_page.php">
+    <tr>
+        <td><label for="fname">Width:</label>
+            <input type="text" id="canvasWidth" name="canvasWidth"></td>
+        <td><label for="lname">Number of Nodes:</label>
+            <input type="text" id="numNodes" name="numNodes"></td>
+        <td><label for="lname">Number of Bad Nodes:</label>
+            <input type="text" id="numBadNodes" name="numBadNodes"></td>
+        <td><label for="lname">Min Connections per Node:</label>
+            <input type="text" id="minConnectionsPerNode" name="minConnectionsPerNode"></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td><label for="lname">Height:</label>
+            <input type="text" id="canvasHeight" name="canvasHeight"></td>
+        <td><label for="lname">Double Spend Delay:</label>
+            <input type="text" id="doubleSpendDelay" name="doubleSpendDelay"></td>
+        <td><label for="lname">Number of Mining Nodes:</label>
+            <input type="text" id="numMiningNodes" name="numMiningNodes"></td>
+        <td><label for="lname">Max Connections per Node:</label>
+            <input type="text" id="maxConnectionsPerNode" name="maxConnectionsPerNode"></td>
+        <td><label for="lname">Max Distance Nodes Can Be Connected:</label>
+            <input type="text" id="nodeDistanceThreshhold" name="nodeDistanceThreshhold"></td>
+    </tr>
+</form>
+</table>
+<button id="initSimulation" onclick="initSimulation(this.id)">1. Init Simulation</button>
+<button id="createNodes" onclick="createNodes(this.id)">2. Create Nodes</button>
+<button id="setBadNodes" onclick="setBadNodes(this.id)">3. Set Bad Nodes</button>
+<button id="setMiningNodes" onclick="setMiningNodes(this.id)">4. Set Mining Nodes</button>
+<button id="transaction1Button" onclick="startTransaction(TRANSACTION1,this.id)">5. Set Transaction</button>
+<button id="startButton" onclick="startSimulation(this.id)">6. Start Simulation</button>
+<button id="stopButton" onclick="stopSimulation(this.id)">7. Stop Simulation</button>
+<table>
+    <tr><td>Ticks:</td><td id="tickerDisplay"></td><td>Active connection attempts:</td><td id="globalConnectionAttempts"></td></tr>
+    <tr><td id="output"></td></tr>
+    </table>
+    
+</body>
+</html>
