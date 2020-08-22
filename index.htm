@@ -477,6 +477,9 @@ function startTransaction(transaction,id) {
     <p>After creating the nodes, as of v. 0.1.1 the simulator will display how many connections there are and their average length in distance units. From this, you can decide how long to set the "Double Spend Delay" parameter. In Satoshi's Snack Machine Problem post, he/she/they imagined a double spend attack as having a delay of about 1 sec. In almost all scenarios the entire network is saturated by then, so test the strength of a network a shorter timeframe needs to be selected. To help estimate how many ticks to leave, as of v. 0.1.2 the simulation gives you an estimate of how many ticks there are in a second assuming that average time between peers is 110ms.</p>
     <p>Limiting the distance between peers can simulate a "mesh" network with less interconnecivity.</p>
     
+    <h3>Double Spend Delay</h3>
+    <p>The number of ticks before the double spend attack begins. Use the estimated "ticks per second" to get a sense of how much time a tick represents.</p>
+    
     <h2>Background</h2>
     <p>The background to this simulation is Satoshi's post on "The Snack Machine Problem", available here: <a href="https://bitcointalk.org/index.php?topic=423.msg3819#msg3819">https://bitcointalk.org/index.php?topic=423.msg3819#msg3819</a></p>
     <h3>Context</h3>
