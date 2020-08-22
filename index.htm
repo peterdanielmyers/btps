@@ -11,7 +11,7 @@ canvas {
 </head>
 <body onload="initPage()">
     <h1>Bitcoin Node Network Transaction Propagation Simulator</h1>
-    <p>v. 0.1.1</p>
+    <p>v. 0.1.2</p>
 <script>
 
 var myGamePiece;
@@ -242,6 +242,7 @@ function connectNodes(node1,node2,d) {
     var average_distance = total_distance/connections.length;
     document.getElementById('connectionNum').innerHTML = connections.length.toString();
     document.getElementById('connectionAverageLength').innerHTML = average_distance.toString();
+    document.getElementById('oneSecTicks').innerHTML = Math.floor(1000*(average_distance/averageTimeInConnection)).toString();
 }
 function createNodes() {
     var i;
@@ -513,6 +514,7 @@ function startTransaction(transaction,id) {
     <p>This race is what the above script simulates: the race between a transaction and a double spend to propagate throughout the network of nodes.</p>
     <h2>Changelog</h2>
     <table>
+        <tr><td>0.1.2</td><td>Displays average ticks per sec.</td></tr>
         <tr><td>0.1.1</td><td>Displays connection number and average length.</td></tr>
         <tr><td>0.1</td><td>First version</td></tr>
     </table>
