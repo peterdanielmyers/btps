@@ -405,6 +405,18 @@ function startTransaction(transaction,id) {
     <tr><td>Ticks:</td><td id="tickerDisplay"></td><td>Active connection attempts:</td><td id="globalConnectionAttempts"></td></tr>
     <tr><td id="output"></td></tr>
     </table>
+    <h2>Usage</h2>
+    <ul><li>Set the parameters you want for the simulation.</li>
+        <li>Click the buttons in the numbered order.
+            <ul><li>Width and Height must be set before pressing 1. Init Simulation.</li>
+                <li>Number of Nodes, Min Connections per Node, Max Connections per Node, and Max Distance Nodes Can Be Connected must be set before pressing 2. Create Nodes.</li>
+                <li>Number of bad nodes must be set before pressing 3. Set Bad Nodes.</li>
+                <li>Number of mining nodes must be set before pressing 4. Set Mining Nodes.</li>
+                <li>Double Spend Delay must be set before pressing 6. Start Simulation.</li>
+            </ul>
+        </li>
+        <li>The simulation will stop when complete and choose a miner to win the next block. You can stop the simulation early with button 7.</li>
+        <li>(You don't <i>need</i> to set "bad nodes" or "mining nodes".)</li></ul>
     <h2>Background</h2>
     <p>The background to this simulation is Satoshi's post on "The Snack Machine Problem", available here: <a href="https://bitcointalk.org/index.php?topic=423.msg3819#msg3819">https://bitcointalk.org/index.php?topic=423.msg3819#msg3819</a></p>
     <h3>Context</h3>
