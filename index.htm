@@ -443,6 +443,14 @@ function startTransaction(transaction,id) {
             <li><a href="#Double_Spend">3.6 Double Spend Delay</a></li>
         </ul>
         <li><a href="#Background">4. Background</a></li>
+        <ul>
+            <li><a href="#Context">4.1 Context</a></li>
+            <li><a href="#Satoshi_Response">4.2 Satoshi's Response</a></li>
+            <ul>
+            <li><a href="#Pre_Blockchain_Validation">4.2.1 Pre-Blockchain Validation</a></li>
+            <li><a href="#Two_Races">4.2.2 Bitcoin's Two Races</a></li>
+            </ul>
+        </ul>
         <li><a href="#Changelog">Changelog</a></li>
     </ul>
     </div>
@@ -502,7 +510,7 @@ function startTransaction(transaction,id) {
     <h2 id="Background">4. Background</h2>
     <p>The background to this simulation is Satoshi's post on "The Snack Machine Problem", available here: <a href="https://bitcointalk.org/index.php?topic=423.msg3819#msg3819">https://bitcointalk.org/index.php?topic=423.msg3819#msg3819</a></p>
     
-    <h3 id="Context">Context</h3>
+    <h3 id="Context">4.1 Context</h3>
     <p>Satoshi was responding to a thread where <a href="https://bitcointalk.org/index.php?topic=423.msg3647#msg3647">someone had posed this problem</a> (here quoted in full, but emphasis mine and I have labelled two sentences A and B):</p>
     <p style="margin-left:5%;font-family:monospace;">
         How would a Bitcoin snack  machine work?<br />
@@ -518,7 +526,7 @@ function startTransaction(transaction,id) {
         <li>Sentence B: The vending machine company don't want people walking away with free candy because the vending machine can't validate transactions. So: the machine needs to validate transactions <i>faster than they can be written to the blockchain</i>.</ul>
     <p>If <i>miners</i> validate transactions, then the snack machine doesn't seem possible, hence the original post.</p>
     
-    <h3 id="Satoshi Response">Satoshi's Response</h3>
+    <h3 id="Satoshi_Response">4.2 Satoshi's Response</h3>
     <p>There was a lot of discussion in response to this post, but I will just skip ahead to Satoshi's answer to this problem. Here's the whole of Satoshi's response (again, all emphasis mine, and I've labelled some sentences):</p>
     <p style="margin-left:5%;font-family:monospace;">
         I believe it'll be possible for a payment processing company to provide as a service the rapid distribution of transactions with <b>good-enough checking in something like 10 seconds or less</b>. (A)<br />
@@ -534,7 +542,7 @@ function startTransaction(transaction,id) {
     <p>It was this post and this explanation about which Satoshi said his famous "If you don't believe me or don't get it, I don't have time to try to convince you, sorry." You can see that here: <a href="https://bitcointalk.org/index.php?topic=532.msg6306#msg6306">https://bitcointalk.org/index.php?topic=532.msg6306#msg6306</a></p>
     <p>And it is certainly the case that after the block size wars, the point Satoshi made in this post is one of the most misunderstood things about Bitcoin. So, let's examine what he says very carefully:</p>
     
-    <h4 id="Pre_Blockchain_Validation">Pre-Blockchain Validation</h4>
+    <h4 id="Pre_Blockchain_Validation">4.2.1 Pre-Blockchain Validation</h4>
     <p><b>Sentence A</b> shows Satoshi is imagining a situation where transactions are validated <b>before they are written to the blockchain</b>:</p>
     <ul><li>He/She/They talk(s) about "checking": so what is the <i>something</i> that is "checking" transactions?</li>
         <li>This checking can be "good enough", implying that it's <i>not as secure</i> as the hash-war process that protects what is written to the blockchain. In the <a href="https://nakamotoinstitute.org/bitcoin/">Bitcoin Whitepaper</a> Satoshi described the chances of an attacker successfully completing a double spend as "vanishingly small as he falls further behind" in the race to find the next block (end of paragraph 5 under §11, or p. 7 of <a href="https://nakamotoinstitute.org/static/docs/bitcoin.pdf">the pdf</a>).</li>
@@ -546,7 +554,7 @@ function startTransaction(transaction,id) {
         <li>The <i>basis</i> for accepting a transaction is whether it is the "first version" of the transaction or not.</li></ul>
     <p>So, Satoshi thought that <i>before writing a block to the blockchain</i> nodes would undergo a process of validating transactions by accepting only the first version of transactions they receive, and rejecting different versions they receive after this.</p>
     
-    <h4 id="Two_Races">Bitcoin's Two Races</h4>
+    <h4 id="Two_Races">4.2.2 Bitcoin's Two Races</h4>
     <p>Satoshi's post imagines that there are at least two races going on within the Bitcoin network. The most famous race is clearly described in the Whitepaper: it is the race for nodes to find the next block.</p>
     <p>But! <b>Sentence C</b> describes the pre-blockchain validation process as "a race to propagate to the most nodes first". This is a different race to the hash-war to find the next block.</p>
     <p>This race is what the above script simulates: the race between a transaction and a double spend to propagate throughout the network of nodes.</p>
