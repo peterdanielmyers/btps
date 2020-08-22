@@ -427,6 +427,7 @@ function startTransaction(transaction,id) {
     <tr><td>Ticks:</td><td id="tickerDisplay"></td><td>Active connection attempts:</td><td id="globalConnectionAttempts"></td></tr>
     <tr><td id="output"></td></tr>
     </table>
+    
     <h2>Usage</h2>
     <ul><li>Set the parameters you want for the simulation.</li>
         <li>Click the buttons in the numbered order.
@@ -439,24 +440,29 @@ function startTransaction(transaction,id) {
         </li>
         <li>The simulation will stop when complete and choose a miner to win the next block. You can stop the simulation early with button 7.</li>
         <li>(You don't <i>need</i> to set "bad nodes" or "mining nodes".)</li></ul>
+    
     <h2>Known Limitations</h2>
     <p>There are at least two significant limitations to be aware of when using this simulation:</p>
     <ol><li>Currently, nodes are modelled as being roughly equally distributed. The number of connections each node has are randomly chosen, so some nodes will have more connections than others. But, because the parameters are applied pseudo-randomly, nodes are more evenly distributed than they would be in real life. The most significant impact this has is that bad nodes have a much more significant impact in very large networks. In reality, if you were a bad actor creating bad nodes it would be extremely difficult, costly, and perhaps impossible to ensure your bad nodes were so well distributed across the network. So, for large networks, the effects of bad nodes are currently over-emphasised.</li>
         <li>Currently, when a node receives a bad transaction, it is just ignored.</li></ol>
     
     <h2>Understanding Parameters and Variables</h2>
+    
     <h3>Width and Height</h3>
     <p>These are just the width and height of the html canvas object. Nodes are distributed evenly throughout the canvas. So size does matter. If you have lots of nodes, it needs to be bigger otherwise it's hard to see what's happening. If you have few nodes, a large canvas, and a small distance for nodes to connect, then the network won't join up properly.</p>
+    
     <h3>Number of Nodes</h3>
     <p>Estimates of the number of nodes (with rough numbers as at 22 August 2020):</p>
     <ul><li>On BTC (~45,000): <a href="http://luke.dashjr.org/programs/bitcoin/files/charts/software.html">http://luke.dashjr.org/programs/bitcoin/files/charts/software.html</a></li>
         <li>On BCH (~1,260): <a href="https://cash.coin.dance/nodes">https://cash.coin.dance/nodes</a> </li>
         <li>On BSV (~300): <a href="https://sv.coin.dance/nodes">https://sv.coin.dance/nodes</a></li></ul>
+    
     <h3>Number of Bad Nodes</h3>
     <p>"Bad Nodes" are nodes that are complicit with the double spend attack. They are programmed to refuse the original transaction, so will only process the double spend transaction. As noted in the section on limitations, the simulation over emphasises the effects of bad nodes on a large network, because it generously assumes that the attacker is able to control nodes that are well distributed and connected throughtout the network. In reality, for a large network, this is extremely difficult—maybe impossible—to achieve.</p>
     <h3>Min/Max Connections per Node</h3>
     <p>In Bitcoin Core default settings, maximum available connection slots per node are 117, this figure comes from: <a href="https://en.bitcoin.it/wiki/Clearing_Up_Misconceptions_About_Full_Nodes#Very_roughly_estimating_the_total_node_count">https://en.bitcoin.it/wiki/Clearing_Up_Misconceptions_About_Full_Nodes#Very_roughly_estimating_the_total_node_count</a></p>
     <p>People running nodes with poorer internet connection and weaker hardware may restrict the number of connections they make, but I presume they would want a certain number of connections to justify having a node at all. I arbitrarily picked 20 as the default for this figure.</p>
+    
     <h3>Number of Mining Nodes</h3>
     <p>Technically speaking, <i>for every block, there is only <b>one</b> mining node.</i></p>
     <p>This is really, really, really important to understand, and a lot of people don't recognise the implications: for every block, there is only <b>one</b> mining node. This is because mining is a zero-sum game.</p>
@@ -464,6 +470,12 @@ function startTransaction(transaction,id) {
     <p>This simulator only simulates a time span leading up the winning of <i>one</i> block. If you wait until the end of the simulation, it will randomly choose a winning node to generate the next block. This node is the only true "mining node" for that block.</p>
     <p>So, what does "number of mining nodes" mean? <b>It means the number of nodes that are racing to find the hash for the next block.</b> The only relevance that the number of and computing power possessed by these nodes have to the blockchain is that they influence the difficulty of the following block. But, the difficulty of the next block is completely irrelevant to the process of transaction propagation. When transactions are propagating before a block is mined, any node that doesn't win the block will end up being non-mining nodes for that block. Furthermore, the endtire network is "blind" as to which node will actually win the block. Two competing versions of a transaction are therefore like a selfish gene: propagating as far as possible, until ultimately one node—and nobody knows which one—will win a block. Whichever transaction that node has received when it wins the block will be written to the chain.</p>
     <p>Not only does a transaction not know which node will "win", it also doesn't know which nodes are even trying to find a block this time around.</p>
+    
+    <h3>Distance Nodes Can Be Created</h3>
+    <p>The screen distance between nodes in the simulation represents latency in the connection between nodes. For this discussion, I will assume that the average latency between peers is 110ms (see <a href="https://hackingdistributed.com/2017/02/15/state-of-the-bitcoin-network/#:~:text=The%20figure%20shows%20the%20estimated,peers%20is%20around%20110%20ms.">https://hackingdistributed.com/2017/02/15/state-of-the-bitcoin-network/#:~:text=The%20figure%20shows%20the%20estimated,peers%20is%20around%20110%20ms.</a>).</p>
+    <p>Currently, this distance is measured in number of pixels divided by 2 (in the JS this number is stored in the variable <span style="font-family:monospace;">distanceDivider</span>). This number was chosen just so the simulation progresses at a pleasing speed. We can call these "distance units".</p>
+    <p>After creating the nodes, as of v. 0.1.1 the simulator will display how many connections there are and their average length in distance units. From this, you can decide how long to set the "Double Spend Delay" parameter. In Satoshi's Snack Machine Problem post, he/she/they imagined a double spend attack as having a delay of about 1 sec. In almost all scenarios the entire network is saturated by then, so test the strength of a network a shorter timeframe needs to be selected. To help estimate how many ticks to leave, as of v. 0.1.2 the simulation gives you an estimate of how many ticks there are in a second assuming that average time between peers is 110ms.</p>
+    <p>Limiting the distance between peers can simulate a "mesh" network with less interconnecivity.</p>
     
     <h2>Background</h2>
     <p>The background to this simulation is Satoshi's post on "The Snack Machine Problem", available here: <a href="https://bitcointalk.org/index.php?topic=423.msg3819#msg3819">https://bitcointalk.org/index.php?topic=423.msg3819#msg3819</a></p>
