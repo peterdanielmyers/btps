@@ -448,7 +448,7 @@ function startTransaction(transaction,id) {
     <tr><td id="output"></td></tr>
     </table>
     
-    <h2>Usage</h2>
+    <h2 id="Usage">Usage</h2>
     <ul><li>Set the parameters you want for the simulation.</li>
         <li>Click the buttons in the numbered order.
             <ul><li>Width and Height must be set before pressing 1. Init Simulation.</li>
@@ -461,29 +461,29 @@ function startTransaction(transaction,id) {
         <li>The simulation will stop when complete and choose a miner to win the next block. You can stop the simulation early with button 7.</li>
         <li>(You don't <i>need</i> to set "bad nodes" or "mining nodes".)</li></ul>
     
-    <h2>Known Limitations</h2>
+    <h2 id="Known_Limitations">Known Limitations</h2>
     <p>There are at least two significant limitations to be aware of when using this simulation:</p>
     <ol><li>Currently, nodes are modelled as being roughly equally distributed. The number of connections each node has are randomly chosen, so some nodes will have more connections than others. But, because the parameters are applied pseudo-randomly, nodes are more evenly distributed than they would be in real life. The most significant impact this has is that bad nodes have a much more significant impact in very large networks. In reality, if you were a bad actor creating bad nodes it would be extremely difficult, costly, and perhaps impossible to ensure your bad nodes were so well distributed across the network. So, for large networks, the effects of bad nodes are currently over-emphasised.</li>
         <li>Currently, when a node receives a bad transaction, it is just ignored.</li></ol>
     
-    <h2>Understanding Parameters and Variables</h2>
+    <h2 id="Paramaters_and_Variables">Understanding Parameters and Variables</h2>
     
-    <h3>Width and Height</h3>
+    <h3 id="Width_and_Height">Width and Height</h3>
     <p>These are just the width and height of the html canvas object. Nodes are distributed evenly throughout the canvas. So size does matter. If you have lots of nodes, it needs to be bigger otherwise it's hard to see what's happening. If you have few nodes, a large canvas, and a small distance for nodes to connect, then the network won't join up properly.</p>
     
-    <h3>Number of Nodes</h3>
+    <h3 id="Number_of_Nodes">Number of Nodes</h3>
     <p>Estimates of the number of nodes (with rough numbers as at 22 August 2020):</p>
     <ul><li>On BTC (~45,000): <a href="http://luke.dashjr.org/programs/bitcoin/files/charts/software.html">http://luke.dashjr.org/programs/bitcoin/files/charts/software.html</a></li>
         <li>On BCH (~1,260): <a href="https://cash.coin.dance/nodes">https://cash.coin.dance/nodes</a> </li>
         <li>On BSV (~300): <a href="https://sv.coin.dance/nodes">https://sv.coin.dance/nodes</a></li></ul>
     
-    <h3>Number of Bad Nodes</h3>
+    <h3 id="Number_of_Bad_Nodes">Number of Bad Nodes</h3>
     <p>"Bad Nodes" are nodes that are complicit with the double spend attack. They are programmed to refuse the original transaction, so will only process the double spend transaction. As noted in the section on limitations, the simulation over emphasises the effects of bad nodes on a large network, because it generously assumes that the attacker is able to control nodes that are well distributed and connected throughtout the network. In reality, for a large network, this is extremely difficult—maybe impossible—to achieve.</p>
     <h3>Min/Max Connections per Node</h3>
     <p>In Bitcoin Core default settings, maximum available connection slots per node are 117, this figure comes from: <a href="https://en.bitcoin.it/wiki/Clearing_Up_Misconceptions_About_Full_Nodes#Very_roughly_estimating_the_total_node_count">https://en.bitcoin.it/wiki/Clearing_Up_Misconceptions_About_Full_Nodes#Very_roughly_estimating_the_total_node_count</a></p>
     <p>People running nodes with poorer internet connection and weaker hardware may restrict the number of connections they make, but I presume they would want a certain number of connections to justify having a node at all. I arbitrarily picked 20 as the default for this figure.</p>
     
-    <h3>Number of Mining Nodes</h3>
+    <h3 id="Number_of_Mining_Nodes">Number of Mining Nodes</h3>
     <p>Technically speaking, <i>for every block, there is only <b>one</b> mining node.</i></p>
     <p>This is really, really, really important to understand, and a lot of people don't recognise the implications: for every block, there is only <b>one</b> mining node. This is because mining is a zero-sum game.</p>
     <p>That means that—for every single block—there are <span style="font-family:monospace;">numNodes-1</span> non-mining nodes.</p>
@@ -491,18 +491,19 @@ function startTransaction(transaction,id) {
     <p>So, what does "number of mining nodes" mean? <b>It means the number of nodes that are racing to find the hash for the next block.</b> The only relevance that the number of and computing power possessed by these nodes have to the blockchain is that they influence the difficulty of the following block. But, the difficulty of the next block is completely irrelevant to the process of transaction propagation. When transactions are propagating before a block is mined, any node that doesn't win the block will end up being non-mining nodes for that block. Furthermore, the endtire network is "blind" as to which node will actually win the block. Two competing versions of a transaction are therefore like a selfish gene: propagating as far as possible, until ultimately one node—and nobody knows which one—will win a block. Whichever transaction that node has received when it wins the block will be written to the chain.</p>
     <p>Not only does a transaction not know which node will "win", it also doesn't know which nodes are even trying to find a block this time around.</p>
     
-    <h3>Distance Nodes Can Be Created</h3>
+    <h3 id="Distance_Nodes">Distance Nodes Can Be Created</h3>
     <p>The screen distance between nodes in the simulation represents latency in the connection between nodes. For this discussion, I will assume that the average latency between peers is 110ms (see <a href="https://hackingdistributed.com/2017/02/15/state-of-the-bitcoin-network/#:~:text=The%20figure%20shows%20the%20estimated,peers%20is%20around%20110%20ms.">https://hackingdistributed.com/2017/02/15/state-of-the-bitcoin-network/#:~:text=The%20figure%20shows%20the%20estimated,peers%20is%20around%20110%20ms.</a>).</p>
     <p>Currently, this distance is measured in number of pixels divided by 2 (in the JS this number is stored in the variable <span style="font-family:monospace;">distanceDivider</span>). This number was chosen just so the simulation progresses at a pleasing speed. We can call these "distance units".</p>
     <p>After creating the nodes, as of v. 0.1.1 the simulator will display how many connections there are and their average length in distance units. From this, you can decide how long to set the "Double Spend Delay" parameter. In Satoshi's Snack Machine Problem post, he/she/they imagined a double spend attack as having a delay of about 1 sec. In almost all scenarios the entire network is saturated by then, so test the strength of a network a shorter timeframe needs to be selected. To help estimate how many ticks to leave, as of v. 0.1.2 the simulation gives you an estimate of how many ticks there are in a second assuming that average time between peers is 110ms.</p>
     <p>Limiting the distance between peers can simulate a "mesh" network with less interconnecivity.</p>
     
-    <h3>Double Spend Delay</h3>
+    <h3 id="Double_Spend">Double Spend Delay</h3>
     <p>The number of ticks before the double spend attack begins. Use the estimated "ticks per second" to get a sense of how much time a tick represents.</p>
     
-    <h2>Background</h2>
+    <h2 id="Background">Background</h2>
     <p>The background to this simulation is Satoshi's post on "The Snack Machine Problem", available here: <a href="https://bitcointalk.org/index.php?topic=423.msg3819#msg3819">https://bitcointalk.org/index.php?topic=423.msg3819#msg3819</a></p>
-    <h3>Context</h3>
+    
+    <h3 id="Context">Context</h3>
     <p>Satoshi was responding to a thread where <a href="https://bitcointalk.org/index.php?topic=423.msg3647#msg3647">someone had posed this problem</a> (here quoted in full, but emphasis mine and I have labelled two sentences A and B):</p>
     <p style="margin-left:5%;font-family:monospace;">
         How would a Bitcoin snack  machine work?<br />
@@ -517,7 +518,8 @@ function startTransaction(transaction,id) {
     <ul><li>Sentence A: Blocks are only created every 10 mins, so it could take ages for the transaction to actually be written to the blockchain.</li>
         <li>Sentence B: The vending machine company don't want people walking away with free candy because the vending machine can't validate transactions. So: the machine needs to validate transactions <i>faster than they can be written to the blockchain</i>.</ul>
     <p>If <i>miners</i> validate transactions, then the snack machine doesn't seem possible, hence the original post.</p>
-    <h3>Satoshi's Response</h3>
+    
+    <h3 id="Satoshi Response">Satoshi's Response</h3>
     <p>There was a lot of discussion in response to this post, but I will just skip ahead to Satoshi's answer to this problem. Here's the whole of Satoshi's response (again, all emphasis mine, and I've labelled some sentences):</p>
     <p style="margin-left:5%;font-family:monospace;">
         I believe it'll be possible for a payment processing company to provide as a service the rapid distribution of transactions with <b>good-enough checking in something like 10 seconds or less</b>. (A)<br />
@@ -532,7 +534,8 @@ function startTransaction(transaction,id) {
         The payment processor <b>has connections with many nodes</b> (F).  When it gets a transaction, <b>it blasts it out, and at the same time monitors the network for double-spends</b> (G).  If it receives a double-spend on any of its many listening nodes, then <b>it alerts that the transaction is bad</b> (H).  A double-spent transaction <b>wouldn't get very far without one of the listeners hearing it</b> (I).  The double-spender would have to wait until the listening phase is over, but by then, the payment processor's broadcast has reached most nodes, or is so far ahead in propagating that the double-spender has no hope of grabbing a significant percentage of the remaining nodes.</p>
     <p>It was this post and this explanation about which Satoshi said his famous "If you don't believe me or don't get it, I don't have time to try to convince you, sorry." You can see that here: <a href="https://bitcointalk.org/index.php?topic=532.msg6306#msg6306">https://bitcointalk.org/index.php?topic=532.msg6306#msg6306</a></p>
     <p>And it is certainly the case that after the block size wars, the point Satoshi made in this post is one of the most misunderstood things about Bitcoin. So, let's examine what he says very carefully:</p>
-    <h4>Pre-Blockchain Validation</h4>
+    
+    <h4 id="Pre_Blockchain_Validation">Pre-Blockchain Validation</h4>
     <p><b>Sentence A</b> shows Satoshi is imagining a situation where transactions are validated <b>before they are written to the blockchain</b>:</p>
     <ul><li>He/She/They talk(s) about "checking": so what is the <i>something</i> that is "checking" transactions?</li>
         <li>This checking can be "good enough", implying that it's <i>not as secure</i> as the hash-war process that protects what is written to the blockchain. In the <a href="https://nakamotoinstitute.org/bitcoin/">Bitcoin Whitepaper</a> Satoshi described the chances of an attacker successfully completing a double spend as "vanishingly small as he falls further behind" in the race to find the next block (end of paragraph 5 under §11, or p. 7 of <a href="https://nakamotoinstitute.org/static/docs/bitcoin.pdf">the pdf</a>).</li>
@@ -543,11 +546,13 @@ function startTransaction(transaction,id) {
         <li>These "network nodes" either "accept" a transaction or they don't.</li>
         <li>The <i>basis</i> for accepting a transaction is whether it is the "first version" of the transaction or not.</li></ul>
     <p>So, Satoshi thought that <i>before writing a block to the blockchain</i> nodes would undergo a process of validating transactions by accepting only the first version of transactions they receive, and rejecting different versions they receive after this.</p>
-    <h4>Bitcoin's Two Races</h4>
+    
+    <h4 id="Two_Races">Bitcoin's Two Races</h4>
     <p>Satoshi's post imagines that there are at least two races going on within the Bitcoin network. The most famous race is clearly described in the Whitepaper: it is the race for nodes to find the next block.</p>
     <p>But! <b>Sentence C</b> describes the pre-blockchain validation process as "a race to propagate to the most nodes first". This is a different race to the hash-war to find the next block.</p>
     <p>This race is what the above script simulates: the race between a transaction and a double spend to propagate throughout the network of nodes.</p>
-    <h2>Changelog</h2>
+    
+    <h2 id="Changelog">Changelog</h2>
     <table>
         <tr><td>0.1.2</td><td>Displays average ticks per sec.</td></tr>
         <tr><td>0.1.1</td><td>Displays connection number and average length.</td></tr>
