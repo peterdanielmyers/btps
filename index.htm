@@ -405,6 +405,50 @@ function startTransaction(transaction,id) {
     <tr><td>Ticks:</td><td id="tickerDisplay"></td><td>Active connection attempts:</td><td id="globalConnectionAttempts"></td></tr>
     <tr><td id="output"></td></tr>
     </table>
-    
+    <h2>Background</h2>
+    <p>The background to this simulation is Satoshi's post on "The Snack Machine Problem", available here: <a href="https://bitcointalk.org/index.php?topic=423.msg3819#msg3819">https://bitcointalk.org/index.php?topic=423.msg3819#msg3819</a></p>
+    <h3>Context</h3>
+    <p>Satoshi was responding to a thread where <a href="https://bitcointalk.org/index.php?topic=423.msg3647#msg3647">someone had posed this problem</a> (here quoted in full, but emphasis mine and I have labelled two sentences A and B):</p>
+    <p style="margin-left:5%;font-family:monospace;">
+        How would a Bitcoin snack  machine work?<br />
+        1) You want to walk up to the machine. Send it a bitcoin.<br />
+        2) ?<br />
+        3) Walk away eating your nice sugary snack. (Profit!)<br />
+        <b>You don't want to have to wait an hour for you transaction to be confirmed.</b> (A)<br />
+        <b>The vending machine company doesn't want to give away lots of free candy.</b> (B)<br />
+        <b>How does step 2 work?</b></p>
+    <p>The (false) assumption behind this problem is that <i>Bitcoin transactions are validated by miners</i>. This assumption is evident from sentences A and B.</p>
+    <p>If one makes this assumption, then on the surface a Bitcoin snack machine would seem to be impossible, because:</p>
+    <ul><li>Sentence A: Blocks are only created every 10 mins, so it could take ages for the transaction to actually be written to the blockchain.</li>
+        <li>Sentence B: The vending machine company don't want people walking away with free candy because the vending machine can't validate transactions. So: the machine needs to validate transactions <i>faster than they can be written to the blockchain</i>.</ul>
+    <p>If <i>miners</i> validate transactions, then the snack machine doesn't seem possible, hence the original post.</p>
+    <h3>Satoshi's Response</h3>
+    <p>There was a lot of discussion in response to this post, but I will just skip ahead to Satoshi's answer to this problem. Here's the whole of Satoshi's response (again, all emphasis mine, and I've labelled some sentences):</p>
+    <p style="margin-left:5%;font-family:monospace;">
+        I believe it'll be possible for a payment processing company to provide as a service the rapid distribution of transactions with <b>good-enough checking in something like 10 seconds or less</b>. (A)<br />
+        The <b>network nodes</b> only <b>accept</b> the <b>first version</b> of a transaction they receive to incorporate into the block <b>they're trying to generate</b> (B).  When you broadcast a transaction, if someone else <b>broadcasts a double-spend at the same time</b>, it's <b>a race to propagate to the most nodes first</b> (C).  If one has a slight head start, it'll <b>geometrically spread through the network faster and get most of the nodes</b> (D).<br />
+        A rough back-of-the-envelope example: (E)<br />
+        1         0<br />
+        4         1<br />
+        16        4<br />
+        64        16<br />
+        80%      20%<br />
+        So if a double-spend has to wait even a second, it has a huge disadvantage.<br />
+        The payment processor <b>has connections with many nodes</b> (F).  When it gets a transaction, <b>it blasts it out, and at the same time monitors the network for double-spends</b> (G).  If it receives a double-spend on any of its many listening nodes, then <b>it alerts that the transaction is bad</b> (H).  A double-spent transaction <b>wouldn't get very far without one of the listeners hearing it</b> (I).  The double-spender would have to wait until the listening phase is over, but by then, the payment processor's broadcast has reached most nodes, or is so far ahead in propagating that the double-spender has no hope of grabbing a significant percentage of the remaining nodes.</p>
+    <h4>Pre-Blockchain Validation</h4>
+    <p><b>Sentence A</b> shows Satoshi is imagining a situation where transactions are validated <b>before they are written to the blockchain</b>:</p>
+    <ul><li>He/She/They talk(s) about "checking": so what is the <i>something</i> that is "checking" transactions?</li>
+        <li>This checking can be "good enough", implying that it's <i>not as secure</i> as the hash-war process that protects what is written to the blockchain. In the <a href="https://nakamotoinstitute.org/bitcoin/">Bitcoin Whitepaper</a> Satoshi described the chances of an attacker successfully completing a double spend as "vanishingly small as he falls further behind" in the race to find the next block (end of paragraph 5 under §11, or p. 7 of <a href="https://nakamotoinstitute.org/static/docs/bitcoin.pdf">the pdf</a>).</li>
+        <li>This checking occurs "in something like 10 seconds or less": meaning it <i>cannot be</i> the mining process that performs the checking, as blocks take 10mins to find.</li></ul>
+    <p>So, Satoshi thought that something <i>other than the blockchain</i> would validate the transaction. This validation is: (a) faster than finding a block; (b) less secure than finding a block, but "good enough".</p>
+    <p><b>Sentence B</b> shows that Satoshi thought nodes would perform this checking before a block is created:</p>
+    <ul><li>He/She/They talk(s) about "network nodes" in the process of "trying to generate" a block.</li>
+        <li>These "network nodes" either "accept" a transaction or they don't.</li>
+        <li>The <i>basis</i> for accepting a transaction is whether it is the "first version" of the transaction or not.</li></ul>
+    <p>So, Satoshi thought that <i>before writing a block to the blockchain</i> nodes would undergo a process of validating transactions by accepting only the first version of transactions they receive, and rejecting different versions they receive after this.</p>
+    <h4>Bitcoin's Two Races</h4>
+    <p>Satoshi's post imagines that there are at least two races going on within the Bitcoin network. The most famous race is clearly described in the Whitepaper: it is the race for nodes to find the next block.</p>
+    <p>But! <b>Sentence C</b> describes the pre-blockchain validation process as "a race to propagate to the most nodes first". This is a different race to the hash-war to find the next block.</p>
+    <p>This race is what the above script simulates: the race between a transaction and a double spend to propagate throughout the network of nodes.</p>
 </body>
 </html>
