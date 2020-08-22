@@ -417,6 +417,10 @@ function startTransaction(transaction,id) {
         </li>
         <li>The simulation will stop when complete and choose a miner to win the next block. You can stop the simulation early with button 7.</li>
         <li>(You don't <i>need</i> to set "bad nodes" or "mining nodes".)</li></ul>
+    <h2>Known Limitations</h2>
+    <p>There are at least two significant limitations to be aware of when using this simulation:</p>
+    <ol><li>Currently, nodes are modelled as being roughly equally distributed. The number of connections each node has are randomly chosen, so some nodes will have more connections than others. But, because the parameters are applied pseudo-randomly, nodes are more evenly distributed than they would be in real life. The most significant impact this has is that bad nodes have a much more significant impact in very large networks. In reality, if you were a bad actor creating bad nodes it would be extremely difficult, costly, and perhaps impossible to ensure your bad nodes were so well distributed across the network. So, for large networks, the effects of bad nodes are currently over-emphasised.</li>
+        <li>Currently, when a node receives a bad transaction, it is just ignored.</li></ol>
     <h2>Background</h2>
     <p>The background to this simulation is Satoshi's post on "The Snack Machine Problem", available here: <a href="https://bitcointalk.org/index.php?topic=423.msg3819#msg3819">https://bitcointalk.org/index.php?topic=423.msg3819#msg3819</a></p>
     <h3>Context</h3>
