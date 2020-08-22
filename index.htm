@@ -91,6 +91,17 @@ class Component {
         }
     }
 }   
+class Connection {
+    constructor(node1x,node1y,node2x,node2y,distance) {
+        this.distance = distance;
+        this.sprite = new Component(
+            node2x, node2y,
+            "grey", node1x, node1y, "connector");
+    }
+    update() {
+        this.sprite.update();
+    }
+}
 class Message {
     constructor(data,distance){
         this.data = data;
@@ -217,8 +228,8 @@ class SimulationArea {
 }
 
 function connectNodes(node1,node2,d) {
-    connections.push(new Component(
-        node2.sprite.x, node2.sprite.y, "grey", node1.sprite.x, node1.sprite.y, "connector"
+    connections.push(new Connection(
+        node1.sprite.x, node1.sprite.y,node2.sprite.x,node2.sprite.y,d
     ));
     node1.connect(node2,d,connections[connections.length - 1]);
     node2.connect(node1,d,connections[connections.length - 1]);
