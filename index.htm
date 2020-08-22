@@ -7,26 +7,6 @@ canvas {
     border:1px solid #d3d3d3;
     background-color: #f1f1f1;
 }
-    body {
-        counter-reset: h2counter;
-    }
-    h1 {
-        counter-reset: h2counter;
-    }
-    h2:before {
-        content: counter(h2counter) ".\0000a0\0000a0";
-        counter-increment: h2counter;
-        counter-reset: h3counter;
-    }
-    h3:before {
-        content: counter(h2counter) "." counter(h3counter) ".\0000a0\0000a0";
-        counter-increment: h3counter;
-        counter-reset: h4counter;
-    }
-    h4:before {
-        content: counter(h2counter) "." counter(h3counter) "." counter(h4counter) ".\0000a0\0000a0";
-        counter-increment: h4counter;
-    }
 </style>
 </head>
 <body onload="initPage()">
@@ -448,7 +428,17 @@ function startTransaction(transaction,id) {
     <tr><td id="output"></td></tr>
     </table>
     
-    <h2 id="Usage">Usage</h2>
+    <div id="toc_container">
+    <p class="toc_title">Contents</p>
+    <ul class="toc_list">
+        <li><a href="#Usage">1. Usage</a>
+        <li><a href="#Known_Limitations">2. Known Limitations</a></li>
+        <li><a href="#Paramaters_and_Variables">3. Understanding Parameters and Variables</a></li>
+        <li><a href="#Changelog">Changelog</a></li>
+    </ul>
+    </div>
+    
+    <h2 id="Usage">1. Usage</h2>
     <ul><li>Set the parameters you want for the simulation.</li>
         <li>Click the buttons in the numbered order.
             <ul><li>Width and Height must be set before pressing 1. Init Simulation.</li>
@@ -461,12 +451,12 @@ function startTransaction(transaction,id) {
         <li>The simulation will stop when complete and choose a miner to win the next block. You can stop the simulation early with button 7.</li>
         <li>(You don't <i>need</i> to set "bad nodes" or "mining nodes".)</li></ul>
     
-    <h2 id="Known_Limitations">Known Limitations</h2>
+    <h2 id="Known_Limitations">2. Known Limitations</h2>
     <p>There are at least two significant limitations to be aware of when using this simulation:</p>
     <ol><li>Currently, nodes are modelled as being roughly equally distributed. The number of connections each node has are randomly chosen, so some nodes will have more connections than others. But, because the parameters are applied pseudo-randomly, nodes are more evenly distributed than they would be in real life. The most significant impact this has is that bad nodes have a much more significant impact in very large networks. In reality, if you were a bad actor creating bad nodes it would be extremely difficult, costly, and perhaps impossible to ensure your bad nodes were so well distributed across the network. So, for large networks, the effects of bad nodes are currently over-emphasised.</li>
         <li>Currently, when a node receives a bad transaction, it is just ignored.</li></ol>
     
-    <h2 id="Paramaters_and_Variables">Understanding Parameters and Variables</h2>
+    <h2 id="Paramaters_and_Variables">3. Understanding Parameters and Variables</h2>
     
     <h3 id="Width_and_Height">Width and Height</h3>
     <p>These are just the width and height of the html canvas object. Nodes are distributed evenly throughout the canvas. So size does matter. If you have lots of nodes, it needs to be bigger otherwise it's hard to see what's happening. If you have few nodes, a large canvas, and a small distance for nodes to connect, then the network won't join up properly.</p>
