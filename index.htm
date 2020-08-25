@@ -245,7 +245,7 @@ function createNodes() {
     numNodes = parseInt(document.getElementById('numNodes').value,10);
     maxConnectionsPerNode = parseInt(document.getElementById('maxConnectionsPerNode').value,10);
     minConnectionsPerNode = parseInt(document.getElementById('minConnectionsPerNode').value,10);
-    nodeIndices = []
+    nodeIndices = [];
     for (i = 0; i < numNodes; i++) {
         nodes.push(new Node(
             Math.floor(Math.random() * (canvasWidth-nodeWidth*2)+nodeWidth),
