@@ -197,6 +197,7 @@ class SimulationArea {
             nodes[i].update();
         }
         
+        nodeDistanceThreshhold = parseInt(document.getElementById('nodeDistanceThreshhold').value,10);
         for (i = 0; i < nodes.length; i++) {
             var j;
             for (j = 0; j < nodes.length; j++) {
